@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from turtle import color
 import pycountry
 import random
 from faker import Faker
@@ -31,9 +32,25 @@ def get_locale(country):
     return COUNTRY_LOCALE_MAP.get(country, "en_US")
 
 root = tk.Tk()
+default_font = ("Segoe UI", 10)
+root.option_add("*Font", default_font)
+
+def create_layout():
+    clear_window()
+
+    container = tk.Frame(root)
+    container.pack(fill="both", expand=True)
+ 
+    sidebar = tk.Frame(container, width=200, bg="#1e1e1e")
+    sidebar.pack(side="left", fill="y")
+
+    content = tk.Frame(container)
+    content.pack(side="right", fill="both", expand=True)
+
+    return sidebar, content
 root.title("MotoGP Manager")
 root.geometry("750x600")
-root.resizable(False, False)
+root.resizable(True, True)
 
 def clear_window():
     for w in root.winfo_children():
@@ -49,7 +66,7 @@ def create_center_frame():
 def show_manager_setup():
     clear_window()
 
-    tk.Label(root, text="Create Manager", font=("Arial",18,"bold")).pack(pady=10)
+    tk.Label(root, text="Create Manager", font=("Segoe UI",18,"bold")).pack(pady=10)
 
     box = tk.Frame(root)
     box.pack()
@@ -84,9 +101,9 @@ def show_manager_setup():
     ttk.Combobox(left, textvariable=trait_var, width=18,
                  values=list(TRAITS.keys())).grid(row=9, column=0)
 
-    tk.Label(right, text="Manager Skills", font=("Arial",12,"bold")).grid(row=0, column=0)
+    tk.Label(right, text="Manager Skills", font=("Segoe UI",12,"bold")).grid(row=0, column=0)
 
-    skill_text = tk.Label(right, font=("Arial",11), justify="left")
+    skill_text = tk.Label(right, font=("Segoe UI",11), justify="left")
     skill_text.grid(row=1, column=0)
 
     skills_ui = {}
@@ -97,10 +114,10 @@ def show_manager_setup():
         skills_ui, skills_real = roll_skills(rep_var.get())
 
         skill_text.config(text=
-            f"{'Negotiation':<18}: {skills_ui['negotiation']}\n"
-            f"{'Engineering':<18}: {skills_ui['engineering']}\n"
-            f"{'Rider Management':<18}: {skills_ui['rider_management']}\n"
-            f"{'Feedback':<18}: {skills_ui['feedback']}"
+            f"{'Negotiation':<20}: {skills_ui['negotiation']}\n"
+            f"{'Engineering':<20}: {skills_ui['engineering']}\n"
+            f"{'Rider Management':<20}: {skills_ui['rider_management']}\n"
+            f"{'Feedback':<20}: {skills_ui['feedback']}"
         )
 
     roll()
@@ -158,41 +175,71 @@ def show_team_selection():
 
     index = [0]
 
-    main = create_center_frame()
+    TITLE_FONT = ("Segoe UI", 16, "bold")
+    TEAM_FONT = ("Segoe UI", 14, "bold")
+    TEXT_FONT = ("Segoe UI", 10)
 
-    title = tk.Label(main, text="Choose Your Team", font=("Arial", 18, "bold"))
-    title.grid(row=0, column=0, columnspan=3, pady=10)
+    container = tk.Frame(root)
+    container.pack(fill="both", expand=True)
 
-    team_frame = tk.Frame(main, bd=2, relief="solid", padx=20, pady=15)
-    team_frame.grid(row=1, column=0, columnspan=3, pady=10)
+    left_panel = tk.Frame(container, width=200, bg="#1e1e1e")
+    left_panel.pack(side="left", fill="y")
 
-    def get_team_riders(team_name):
-        team_riders = [r["name"] for r in riders if r["team"] == team_name]
-        if len(team_riders) == 0:
-            return "-", "-", "-"
-        if len(team_riders) == 1:
-            return team_riders[0], "-", "-"
-        if len(team_riders) == 2:
-            return team_riders[0], team_riders[1], "-"
-        return team_riders[0], team_riders[1], team_riders[2]
+    right_panel = tk.Frame(container)
+    right_panel.pack(side="right", fill="both", expand=True)
 
-    def get_manager_name(i):
-        if i < len(ai_managers):
-            return ai_managers[i].get("name", "Unknown")
-        return "Unknown"
+    tk.Label(left_panel, text="Teams",
+             fg="white", bg="#1e1e1e",
+             font=TITLE_FONT).pack(pady=10)
+
+    team_listbox = tk.Listbox(left_panel,
+                             bg="#2b2b2b",
+                             fg="white",
+                             font=TEXT_FONT,
+                             selectbackground="#444",
+                             activestyle="none")
+    team_listbox.pack(fill="y", expand=True, padx=10, pady=10)
+
+    for t in teams:
+        team_listbox.insert(tk.END, t["name"])
+
+    top_bar = tk.Frame(right_panel)
+    top_bar.pack(fill="x")
+
+    btn_select = tk.Button(top_bar, text="Select Team", width=15)
+    btn_select.pack(side="right", padx=10, pady=10)
+
+    content = tk.Frame(right_panel, padx=20, pady=20)
+    content.pack(fill="both", expand=True)
+
+    def get_text_color(bg):
+        bg = bg.lstrip("#")
+        r, g, b = int(bg[0:2],16), int(bg[2:4],16), int(bg[4:6],16)
+        brightness = (r*299 + g*587 + b*114) / 1000
+        return "black" if brightness > 128 else "white"
 
     def render():
-        for w in team_frame.winfo_children():
+        for w in content.winfo_children():
             w.destroy()
 
         i = index[0]
         t = teams[i]
 
-        rider1, rider2, test_rider = get_team_riders(t["name"])
+        color = t.get("color", "#333333")
+        text_color = get_text_color(color)
 
-        manager_name = get_manager_name(i)
+        right_panel.configure(bg=color)
+        content.configure(bg=color)
+        top_bar.configure(bg=color)
+        btn_select.configure(bg=color, fg=text_color, activebackground=color)
 
-        color = t.get("color", "gray")
+        team_riders = [r["name"] for r in riders if r["team"] == t["name"]]
+
+        rider1 = team_riders[0] if len(team_riders) > 0 else "-"
+        rider2 = team_riders[1] if len(team_riders) > 1 else "-"
+        test_rider = t.get("test_rider") or "-"
+
+        manager_name = ai_managers[i]["name"] if i < len(ai_managers) else "Unknown"
 
         status = "Factory" if t.get("factory") else "Satellite"
 
@@ -203,43 +250,70 @@ def show_team_selection():
         else:
             target = "Midfield"
 
-        tk.Label(team_frame, text=t["name"], font=("Arial", 16, "bold")).pack()
+        tk.Label(content, text=t["name"],
+                 font=TEAM_FONT,
+                 bg=color, fg=text_color)\
+            .grid(row=0, column=0, columnspan=2, pady=(0,15))
 
-        tk.Label(team_frame, text=f"Color            : {color}").pack(anchor="w")
-        tk.Label(team_frame, text=f"Engine           : {t['bike']['engine']}").pack(anchor="w")
-        tk.Label(team_frame, text=f"Aero             : {t['bike']['aero']}").pack(anchor="w")
-        tk.Label(team_frame, text=f"Reliability      : {t['bike']['reliability']}").pack(anchor="w")
-        tk.Label(team_frame, text=f"Budget           : {t['budget']}").pack(anchor="w")
+        row = 1
 
-        tk.Label(team_frame, text="").pack()
+        def add_row(label, value):
+            nonlocal row
 
-        tk.Label(team_frame, text=f"Rider 1          : {rider1}").pack(anchor="w")
-        tk.Label(team_frame, text=f"Rider 2          : {rider2}").pack(anchor="w")
-        tk.Label(team_frame, text=f"Test Rider       : {test_rider}").pack(anchor="w")
+            tk.Label(content,
+                     text=label,
+                     font=TEXT_FONT,
+                     bg=color,
+                     fg=text_color,
+                     anchor="w",
+                     width=20)\
+                .grid(row=row, column=0, sticky="w")
 
-        tk.Label(team_frame, text="").pack()
+            tk.Label(content,
+                     text=str(value),
+                     font=TEXT_FONT,
+                     bg=color,
+                     fg=text_color,
+                     anchor="w",
+                     width=20)\
+                .grid(row=row, column=1, sticky="w")
 
-        tk.Label(team_frame, text=f"Manager          : {manager_name}").pack(anchor="w")
-        tk.Label(team_frame, text=f"Status           : {status}").pack(anchor="w")
-        tk.Label(team_frame, text=f"Target           : {target}").pack(anchor="w")
+            row += 1
 
-    def next_team():
-        index[0] = (index[0] + 1) % len(teams)
-        render()
+        add_row("Engine", t['bike']['engine'])
+        add_row("Aero", t['bike']['aero'])
+        add_row("Reliability", t['bike']['reliability'])
+        add_row("Budget", t['budget'])
 
-    def prev_team():
-        index[0] = (index[0] - 1) % len(teams)
-        render()
+        row += 1
+
+        add_row("Rider 1", rider1)
+        add_row("Rider 2", rider2)
+        add_row("Test Rider", test_rider)
+
+        row += 1
+
+        add_row("Manager", manager_name)
+        add_row("Status", status)
+        add_row("Target", target)
+
+        content.grid_columnconfigure(0, weight=0)
+        content.grid_columnconfigure(1, weight=0)
+
+    def on_select(event):
+        if team_listbox.curselection():
+            index[0] = team_listbox.curselection()[0]
+            render()
 
     def select_team():
         global player_team_index
         player_team_index = index[0]
         show_game()
 
-    tk.Button(main, text="<", width=5, command=prev_team).grid(row=2, column=0)
-    tk.Button(main, text="Select", width=15, command=select_team).grid(row=2, column=1)
-    tk.Button(main, text=">", width=5, command=next_team).grid(row=2, column=2)
+    team_listbox.bind("<<ListboxSelect>>", on_select)
+    btn_select.configure(command=select_team)
 
+    team_listbox.select_set(0)
     render()
 
 def next_race():
@@ -277,30 +351,43 @@ def update_ui():
     info.config(text=f"{manager['name']} | {team['name']} | Season {season} | {team['budget']}")
 
 def show_game():
-    clear_window()
-    main = create_center_frame()
+    sidebar, content = create_layout()
 
-    top = tk.Frame(main)
-    top.grid(row=0, column=0)
+    TITLE_FONT = ("Segoe UI", 14, "bold")
+    TEXT_FONT = ("Segoe UI", 10)
 
-    tk.Button(top, text="Next Race", command=next_race).grid(row=0, column=0)
-    tk.Button(top, text="Upgrade", command=do_upgrade).grid(row=0, column=1)
-    tk.Button(top, text="Save", command=save).grid(row=0, column=2)
-    tk.Button(top, text="Menu", command=show_menu).grid(row=0, column=3)
+    tk.Label(sidebar, text="Menu",
+             fg="white", bg="#1e1e1e",
+             font=TITLE_FONT).pack(pady=10)
+
+    tk.Button(sidebar, text="Next Race", width=20,
+              command=next_race).pack(pady=5)
+
+    tk.Button(sidebar, text="Upgrade Bike", width=20,
+              command=do_upgrade).pack(pady=5)
+
+    tk.Button(sidebar, text="Save", width=20,
+              command=save).pack(pady=5)
+
+    tk.Button(sidebar, text="Main Menu", width=20,
+              command=show_menu).pack(pady=5)
+
+    top = tk.Frame(content)
+    top.pack(fill="x")
 
     global info, text, log
 
-    info = tk.Label(main)
-    info.grid(row=1, column=0)
+    info = tk.Label(top, font=TEXT_FONT)
+    info.pack(anchor="w", padx=10, pady=10)
 
-    content = tk.Frame(main)
-    content.grid(row=2, column=0)
+    main_area = tk.Frame(content)
+    main_area.pack(fill="both", expand=True)
 
-    text = tk.Text(content, width=40, height=15)
-    text.grid(row=0, column=0)
+    text = tk.Text(main_area, width=40)
+    text.pack(side="left", fill="both", expand=True, padx=10, pady=10)
 
-    log = tk.Text(content, width=30, height=15)
-    log.grid(row=0, column=1)
+    log = tk.Text(main_area, width=30)
+    log.pack(side="right", fill="y", padx=10, pady=10)
 
     update_ui()
 
@@ -323,16 +410,42 @@ def resume_game():
 
 def show_menu():
     clear_window()
-    f = create_center_frame()
 
-    tk.Label(f, text="MotoGP Manager", font=("Arial",20)).grid(row=0, column=0, pady=20)
+    TITLE_FONT = ("Segoe UI", 24, "bold")
+    BTN_FONT = ("Segoe UI", 11)
 
-    tk.Button(f, text="New Game", width=25, command=new_game).grid(row=1, column=0)
+    wrapper = tk.Frame(root)
+    wrapper.pack(expand=True)
+
+    container = tk.Frame(wrapper)
+    container.pack()
+
+    tk.Label(container,
+             text="MotoGP Manager",
+             font=TITLE_FONT)\
+        .pack(pady=(0, 20))
+
+    tk.Button(container,
+              text="New Game",
+              width=25,
+              font=BTN_FONT,
+              command=new_game)\
+        .pack(pady=5)
 
     if load_game():
-        tk.Button(f, text="Resume", width=25, command=resume_game).grid(row=2, column=0)
+        tk.Button(container,
+                  text="Resume",
+                  width=25,
+                  font=BTN_FONT,
+                  command=resume_game)\
+            .pack(pady=5)
 
-    tk.Button(f, text="Quit", width=25, command=root.quit).grid(row=3, column=0)
+    tk.Button(container,
+              text="Quit",
+              width=25,
+              font=BTN_FONT,
+              command=root.quit)\
+        .pack(pady=5)
 
 show_menu()
 root.mainloop()
