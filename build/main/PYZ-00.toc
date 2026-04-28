@@ -200,6 +200,7 @@
    'C:\\laragon\\bin\\python\\python-3.10\\lib\\logging\\__init__.py',
    'PYMODULE'),
   ('lzma', 'C:\\laragon\\bin\\python\\python-3.10\\lib\\lzma.py', 'PYMODULE'),
+  ('manager', 'E:\\Project\\manager.py', 'PYMODULE'),
   ('numbers',
    'C:\\laragon\\bin\\python\\python-3.10\\lib\\numbers.py',
    'PYMODULE'),

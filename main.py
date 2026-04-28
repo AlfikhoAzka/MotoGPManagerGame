@@ -1,6 +1,8 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import pycountry
+import random
+from faker import Faker
 
 from data import generate_riders, generate_teams
 from race import simulate_race
@@ -9,6 +11,7 @@ from save_load import save_game, load_game
 
 from manager import roll_skills, generate_ai_managers, apply_trait_effect, TRAITS
 
+# ================= STATE =================
 riders = []
 teams = []
 ai_managers = []
@@ -18,6 +21,18 @@ player_team_index = 0
 
 countries = sorted([c.name for c in pycountry.countries])
 
+# ================= LOCALE =================
+COUNTRY_LOCALE_MAP = {
+    "Italy": "it_IT", "Spain": "es_ES", "France": "fr_FR",
+    "Germany": "de_DE", "United Kingdom": "en_GB",
+    "United States": "en_US", "Indonesia": "id_ID",
+    "Japan": "ja_JP", "Brazil": "pt_BR"
+}
+
+def get_locale(country):
+    return COUNTRY_LOCALE_MAP.get(country, "en_US")
+
+# ================= UI BASE =================
 root = tk.Tk()
 root.title("MotoGP Manager")
 root.geometry("750x600")
@@ -34,6 +49,7 @@ def create_center_frame():
     f.pack()
     return f
 
+# ================= MANAGER SETUP =================
 def show_manager_setup():
     clear_window()
 
@@ -48,6 +64,7 @@ def show_manager_setup():
     right = tk.Frame(box)
     right.grid(row=0, column=1, padx=30)
 
+    # INPUT
     tk.Label(left, text="Name").grid(row=0, column=0, sticky="w")
     name_entry = tk.Entry(left)
     name_entry.grid(row=1, column=0)
@@ -62,19 +79,17 @@ def show_manager_setup():
     ttk.Combobox(left, textvariable=country_var, values=countries, width=18).grid(row=5, column=0)
 
     tk.Label(left, text="Reputation").grid(row=6, column=0, sticky="w")
-    rep_var = tk.StringVar()
-    rep_box = ttk.Combobox(left, textvariable=rep_var, width=18)
-    rep_box["values"] = ["Newcomer", "Known Manager", "Elite Manager"]
-    rep_box.current(0)
+    rep_var = tk.StringVar(value="Newcomer")
+    rep_box = ttk.Combobox(left, textvariable=rep_var, width=18,
+                           values=["Newcomer", "Known Manager", "Elite Manager"])
     rep_box.grid(row=7, column=0)
 
     tk.Label(left, text="Trait").grid(row=8, column=0, sticky="w")
-    trait_var = tk.StringVar()
-    trait_box = ttk.Combobox(left, textvariable=trait_var, width=18)
-    trait_box["values"] = list(TRAITS.keys())
-    trait_box.current(0)
-    trait_box.grid(row=9, column=0)
+    trait_var = tk.StringVar(value="No Trait")
+    ttk.Combobox(left, textvariable=trait_var, width=18,
+                 values=list(TRAITS.keys())).grid(row=9, column=0)
 
+    # SKILL DISPLAY
     tk.Label(right, text="Manager Skills", font=("Arial",12,"bold")).grid(row=0, column=0)
 
     skill_text = tk.Label(right, font=("Arial",11), justify="left")
@@ -85,53 +100,69 @@ def show_manager_setup():
 
     def roll():
         nonlocal skills_ui, skills_real
+        skills_ui, skills_real = roll_skills(rep_var.get())
 
-        skills_ui, skills_real = roll_skills()
-
-        rep = rep_var.get()
-
-        if rep == "Known Manager":
-            skills_real = {k: min(20, v+2) for k,v in skills_real.items()}
-        elif rep == "Elite Manager":
-            skills_real = {k: min(20, v+4) for k,v in skills_real.items()}
-
-        skill_text.config(
-            text=
+        skill_text.config(text=
             f"{'Negotiation':<18}: {skills_ui['negotiation']}\n"
             f"{'Engineering':<18}: {skills_ui['engineering']}\n"
             f"{'Rider Management':<18}: {skills_ui['rider_management']}\n"
             f"{'Feedback':<18}: {skills_ui['feedback']}"
         )
 
+    # AUTO ROLL
     roll()
+
+    # AUTO REROLL SAAT GANTI REPUTASI
+    rep_var.trace_add("write", lambda *args: roll())
 
     tk.Button(right, text="Reroll", command=roll).grid(row=2, column=0, pady=10)
 
+    # ================= START =================
     def start_game():
         global riders, teams, manager, ai_managers, season
 
-        riders = generate_riders()
-        teams = generate_teams()
+        try:
+            name = name_entry.get().strip()
+            country = country_var.get().strip()
 
-        manager = {
-            "name": name_entry.get(),
-            "age": int(age_entry.get() or 30),
-            "country": country_var.get(),
-            "trait": trait_var.get(),
-            "reputation": rep_var.get(),
-            "skills": skills_real
-        }
+            # AUTO COUNTRY
+            if not country:
+                country = random.choice(countries)
 
-        apply_trait_effect(manager)
+            # AUTO NAME VIA FAKER
+            locale = get_locale(country)
+            fake = Faker(locale)
 
-        ai_managers = generate_ai_managers(teams)
+            if not name:
+                name = fake.name()
 
-        season = 1
-        show_team_selection()
+            # INIT GAME
+            riders = generate_riders()
+            teams = generate_teams()
+
+            manager = {
+                "name": name,
+                "age": int(age_entry.get() or 30),
+                "country": country,
+                "trait": trait_var.get(),
+                "reputation": rep_var.get(),
+                "skills": skills_real
+            }
+
+            apply_trait_effect(manager)
+            ai_managers = generate_ai_managers(teams)
+
+            season = 1
+
+            show_team_selection()  # <<< FIX UTAMA ADA DISINI
+
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
 
     tk.Button(root, text="Start", command=start_game).pack(pady=10)
     tk.Button(root, text="Back", command=show_menu).pack()
 
+# ================= TEAM SELECT =================
 def get_player_team():
     return teams[player_team_index]
 
@@ -140,11 +171,8 @@ def show_team_selection():
 
     tk.Label(root, text="Choose Your Team", font=("Arial",18,"bold")).pack(pady=10)
 
-    container = tk.Frame(root)
-    container.pack()
-
     for i, t in enumerate(teams):
-        frame = tk.Frame(container, bd=1, relief="solid", padx=10, pady=5)
+        frame = tk.Frame(root, bd=1, relief="solid", padx=10, pady=5)
         frame.pack(pady=5, fill="x")
 
         tk.Label(frame, text=t["name"], font=("Arial",12,"bold")).pack(anchor="w")
@@ -157,29 +185,21 @@ def show_team_selection():
 
         tk.Button(frame, text="Select", command=select_team).pack(anchor="e")
 
+# ================= GAME =================
 def next_race():
     global season
 
     simulate_race(riders, teams, manager)
 
     for i, t in enumerate(teams):
-        if i == player_team_index:
-            m = manager
-        elif i < len(ai_managers):
-            m = ai_managers[i]
-        else:
-            m = manager
-
-        income = calculate_income(t, riders, m)
-        salary = pay_salaries(t, riders)
-        t["budget"] += income - salary
+        m = manager if i == player_team_index else ai_managers[i]
+        t["budget"] += calculate_income(t, riders, m) - pay_salaries(t, riders)
 
     season += 1
     update_ui()
 
 def do_upgrade():
-    msg = upgrade_bike(get_player_team(), manager)
-    log.insert(tk.END, msg + "\n")
+    log.insert(tk.END, upgrade_bike(get_player_team(), manager) + "\n")
 
 def save():
     save_game({
@@ -190,21 +210,15 @@ def save():
         "manager": manager,
         "ai_managers": ai_managers
     })
-    log.insert(tk.END, "Saved\n")
 
 def update_ui():
     text.delete("1.0", tk.END)
 
-    sorted_riders = sorted(riders, key=lambda x: x["points"], reverse=True)
-
-    for i, r in enumerate(sorted_riders, 1):
+    for i, r in enumerate(sorted(riders, key=lambda x: x["points"], reverse=True), 1):
         text.insert(tk.END, f"{i}. {r['name']} - {r['points']} pts\n")
 
     team = get_player_team()
-
-    info.config(
-        text=f"{manager.get('name')} | Team: {team['name']} | Season {season} | Budget {team['budget']}"
-    )
+    info.config(text=f"{manager['name']} | {team['name']} | Season {season} | {team['budget']}")
 
 def show_game():
     clear_window()
@@ -234,6 +248,7 @@ def show_game():
 
     update_ui()
 
+# ================= MENU =================
 def new_game():
     show_manager_setup()
 
@@ -245,9 +260,9 @@ def resume_game():
         riders = data["riders"]
         teams = data["teams"]
         season = data["season"]
-        manager = data.get("manager", {})
-        ai_managers = data.get("ai_managers", [])
-        player_team_index = data.get("player_team_index", 0)
+        manager = data["manager"]
+        ai_managers = data["ai_managers"]
+        player_team_index = data["player_team_index"]
 
     show_game()
 

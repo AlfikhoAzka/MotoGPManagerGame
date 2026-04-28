@@ -1,30 +1,32 @@
 import random
 
-REAL_MANAGERS = {
-    "Aprilia": {
-        "name": "Massimo Rivola",
-        "skills": {"negotiation":14,"engineering":16,"rider_management":13,"feedback":15},
-        "trait": "Technical Genius",
-        "fixed": True
+# ================= TRAITS =================
+TRAITS = {
+    "No Trait": {},
+
+    "Former Businessman": {
+        "income_bonus": 1.15
     },
-    "Ducati": {
-        "name": "Gigi Dall'Igna",
-        "skills": {"negotiation":12,"engineering":20,"rider_management":12,"feedback":18},
-        "trait": "Technical Genius",
-        "fixed": True
+
+    "Technical Genius": {
+        "upgrade_bonus": 1.15
+    },
+
+    "Ex MotoGP Rider": {
+        "race_bonus": 1.05
+    },
+
+    "People Person": {
+        "morale_bonus": 1.1
+    },
+
+    "Data Driven": {
+        "consistency_bonus": 1.05
     }
 }
 
-TRAITS = {
-    "No Trait": {},
-    "Former Businessman": {"negotiation": 2},
-    "Technical Genius": {"engineering": 3},
-    "Ex MotoGP Rider": {"rider_management": 2},
-    "People Person": {"rider_management": 2},
-    "Data Driven": {"feedback": 2}
-}
-
-def generate_skill_pattern():
+# ================= SKILL SYSTEM =================
+def generate_pattern():
     patterns = [
         [6,6,6,6],
         [9,5,5,3],
@@ -34,30 +36,73 @@ def generate_skill_pattern():
     ]
     return random.choice(patterns)
 
-def roll_skills():
-    base = generate_skill_pattern()
+def roll_skills(reputation):
+    base = generate_pattern()
     random.shuffle(base)
 
-    ui = {
+    skills_ui = {
         "negotiation": base[0],
         "engineering": base[1],
         "rider_management": base[2],
         "feedback": base[3]
     }
 
-    real = {
-        k: min(20, max(1, v*2 + random.randint(-1,1)))
-        for k,v in ui.items()
+    # SCALE BERDASARKAN REPUTASI
+    multiplier = 2
+    variance = 1
+    max_cap = 20
+
+    if reputation == "Newcomer":
+        multiplier = 2
+        variance = 1
+        max_cap = 12
+
+    elif reputation == "Known Manager":
+        multiplier = 2
+        variance = 2
+        max_cap = 16
+
+    elif reputation == "Elite Manager":
+        multiplier = 2
+        variance = 3
+        max_cap = 20
+
+    skills_real = {
+        k: max(1, min(max_cap, v * multiplier + random.randint(-variance, variance)))
+        for k, v in skills_ui.items()
     }
 
-    return ui, real
+    return skills_ui, skills_real
 
+# ================= TRAIT EFFECT =================
 def apply_trait_effect(manager):
     trait = manager.get("trait", "No Trait")
-    bonus = TRAITS.get(trait, {})
+    manager["effects"] = TRAITS.get(trait, {})
 
-    for k, v in bonus.items():
-        manager["skills"][k] = min(20, manager["skills"][k] + v)
+# ================= GAMEPLAY EFFECT =================
+def apply_income_bonus(base_income, manager):
+    bonus = manager.get("effects", {}).get("income_bonus", 1.0)
+    return int(base_income * bonus)
+
+def apply_upgrade_bonus(base_gain, manager):
+    bonus = manager.get("effects", {}).get("upgrade_bonus", 1.0)
+    return int(base_gain * bonus)
+
+# ================= AI MANAGER =================
+REAL_MANAGERS = {
+    "Ducati": {
+        "name": "Gigi Dall'Igna",
+        "skills": {"negotiation":12,"engineering":20,"rider_management":12,"feedback":18},
+        "trait": "Technical Genius",
+        "reputation": "Elite Manager"
+    },
+    "Aprilia": {
+        "name": "Massimo Rivola",
+        "skills": {"negotiation":14,"engineering":16,"rider_management":13,"feedback":15},
+        "trait": "Technical Genius",
+        "reputation": "Elite Manager"
+    }
+}
 
 def generate_ai_managers(teams):
     result = []
@@ -66,14 +111,18 @@ def generate_ai_managers(teams):
         name = t["name"]
 
         if name in REAL_MANAGERS:
-            result.append(REAL_MANAGERS[name])
+            m = REAL_MANAGERS[name]
+            apply_trait_effect(m)
+            result.append(m)
         else:
-            _, skills = roll_skills()
+            rep = random.choice(["Newcomer","Known Manager","Elite Manager"])
+            _, skills = roll_skills(rep)
 
             m = {
                 "name": f"{name} Manager",
                 "skills": skills,
-                "trait": random.choice(list(TRAITS.keys()))
+                "trait": random.choice(list(TRAITS.keys())),
+                "reputation": rep
             }
 
             apply_trait_effect(m)
