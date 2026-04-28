@@ -11,7 +11,6 @@ from save_load import save_game, load_game
 
 from manager import roll_skills, generate_ai_managers, apply_trait_effect, TRAITS
 
-# ================= STATE =================
 riders = []
 teams = []
 ai_managers = []
@@ -21,7 +20,6 @@ player_team_index = 0
 
 countries = sorted([c.name for c in pycountry.countries])
 
-# ================= LOCALE =================
 COUNTRY_LOCALE_MAP = {
     "Italy": "it_IT", "Spain": "es_ES", "France": "fr_FR",
     "Germany": "de_DE", "United Kingdom": "en_GB",
@@ -32,7 +30,6 @@ COUNTRY_LOCALE_MAP = {
 def get_locale(country):
     return COUNTRY_LOCALE_MAP.get(country, "en_US")
 
-# ================= UI BASE =================
 root = tk.Tk()
 root.title("MotoGP Manager")
 root.geometry("750x600")
@@ -49,7 +46,6 @@ def create_center_frame():
     f.pack()
     return f
 
-# ================= MANAGER SETUP =================
 def show_manager_setup():
     clear_window()
 
@@ -64,7 +60,6 @@ def show_manager_setup():
     right = tk.Frame(box)
     right.grid(row=0, column=1, padx=30)
 
-    # INPUT
     tk.Label(left, text="Name").grid(row=0, column=0, sticky="w")
     name_entry = tk.Entry(left)
     name_entry.grid(row=1, column=0)
@@ -89,7 +84,6 @@ def show_manager_setup():
     ttk.Combobox(left, textvariable=trait_var, width=18,
                  values=list(TRAITS.keys())).grid(row=9, column=0)
 
-    # SKILL DISPLAY
     tk.Label(right, text="Manager Skills", font=("Arial",12,"bold")).grid(row=0, column=0)
 
     skill_text = tk.Label(right, font=("Arial",11), justify="left")
@@ -109,15 +103,12 @@ def show_manager_setup():
             f"{'Feedback':<18}: {skills_ui['feedback']}"
         )
 
-    # AUTO ROLL
     roll()
 
-    # AUTO REROLL SAAT GANTI REPUTASI
     rep_var.trace_add("write", lambda *args: roll())
 
     tk.Button(right, text="Reroll", command=roll).grid(row=2, column=0, pady=10)
 
-    # ================= START =================
     def start_game():
         global riders, teams, manager, ai_managers, season
 
@@ -125,18 +116,15 @@ def show_manager_setup():
             name = name_entry.get().strip()
             country = country_var.get().strip()
 
-            # AUTO COUNTRY
             if not country:
                 country = random.choice(countries)
 
-            # AUTO NAME VIA FAKER
             locale = get_locale(country)
             fake = Faker(locale)
 
             if not name:
                 name = fake.name()
 
-            # INIT GAME
             riders = generate_riders()
             teams = generate_teams()
 
@@ -162,7 +150,6 @@ def show_manager_setup():
     tk.Button(root, text="Start", command=start_game).pack(pady=10)
     tk.Button(root, text="Back", command=show_menu).pack()
 
-# ================= TEAM SELECT =================
 def get_player_team():
     return teams[player_team_index]
 
@@ -317,7 +304,6 @@ def show_game():
 
     update_ui()
 
-# ================= MENU =================
 def new_game():
     show_manager_setup()
 

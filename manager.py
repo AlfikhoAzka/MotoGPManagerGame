@@ -1,6 +1,5 @@
 import random
 
-# ================= TRAITS =================
 TRAITS = {
     "No Trait": {},
 
@@ -25,7 +24,6 @@ TRAITS = {
     }
 }
 
-# ================= SKILL SYSTEM =================
 def generate_pattern():
     patterns = [
         [6,6,6,6],
@@ -47,7 +45,6 @@ def roll_skills(reputation):
         "feedback": base[3]
     }
 
-    # SCALE BERDASARKAN REPUTASI
     multiplier = 2
     variance = 1
     max_cap = 20
@@ -74,12 +71,10 @@ def roll_skills(reputation):
 
     return skills_ui, skills_real
 
-# ================= TRAIT EFFECT =================
 def apply_trait_effect(manager):
     trait = manager.get("trait", "No Trait")
     manager["effects"] = TRAITS.get(trait, {})
 
-# ================= GAMEPLAY EFFECT =================
 def apply_income_bonus(base_income, manager):
     bonus = manager.get("effects", {}).get("income_bonus", 1.0)
     return int(base_income * bonus)
@@ -88,7 +83,6 @@ def apply_upgrade_bonus(base_gain, manager):
     bonus = manager.get("effects", {}).get("upgrade_bonus", 1.0)
     return int(base_gain * bonus)
 
-# ================= AI MANAGER =================
 REAL_MANAGERS = {
     "Ducati": {
         "name": "Gigi Dall'Igna",
