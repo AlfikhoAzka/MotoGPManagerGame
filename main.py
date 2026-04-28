@@ -154,7 +154,7 @@ def show_manager_setup():
 
             season = 1
 
-            show_team_selection()  # <<< FIX UTAMA ADA DISINI
+            show_team_selection()
 
         except Exception as e:
             messagebox.showerror("Error", str(e))
@@ -169,23 +169,92 @@ def get_player_team():
 def show_team_selection():
     clear_window()
 
-    tk.Label(root, text="Choose Your Team", font=("Arial",18,"bold")).pack(pady=10)
+    index = [0]
 
-    for i, t in enumerate(teams):
-        frame = tk.Frame(root, bd=1, relief="solid", padx=10, pady=5)
-        frame.pack(pady=5, fill="x")
+    main = create_center_frame()
 
-        tk.Label(frame, text=t["name"], font=("Arial",12,"bold")).pack(anchor="w")
-        tk.Label(frame, text=f"Budget: {t['budget']}").pack(anchor="w")
+    title = tk.Label(main, text="Choose Your Team", font=("Arial", 18, "bold"))
+    title.grid(row=0, column=0, columnspan=3, pady=10)
 
-        def select_team(index=i):
-            global player_team_index
-            player_team_index = index
-            show_game()
+    team_frame = tk.Frame(main, bd=2, relief="solid", padx=20, pady=15)
+    team_frame.grid(row=1, column=0, columnspan=3, pady=10)
 
-        tk.Button(frame, text="Select", command=select_team).pack(anchor="e")
+    def get_team_riders(team_name):
+        team_riders = [r["name"] for r in riders if r["team"] == team_name]
+        if len(team_riders) == 0:
+            return "-", "-", "-"
+        if len(team_riders) == 1:
+            return team_riders[0], "-", "-"
+        if len(team_riders) == 2:
+            return team_riders[0], team_riders[1], "-"
+        return team_riders[0], team_riders[1], team_riders[2]
 
-# ================= GAME =================
+    def get_manager_name(i):
+        if i < len(ai_managers):
+            return ai_managers[i].get("name", "Unknown")
+        return "Unknown"
+
+    def render():
+        for w in team_frame.winfo_children():
+            w.destroy()
+
+        i = index[0]
+        t = teams[i]
+
+        rider1, rider2, test_rider = get_team_riders(t["name"])
+
+        manager_name = get_manager_name(i)
+
+        color = t.get("color", "gray")
+
+        status = "Factory" if t.get("factory") else "Satellite"
+
+        if t["budget"] > 6000000:
+            target = "Win Championship"
+        elif t["budget"] > 4000000:
+            target = "Podium Fight"
+        else:
+            target = "Midfield"
+
+        tk.Label(team_frame, text=t["name"], font=("Arial", 16, "bold")).pack()
+
+        tk.Label(team_frame, text=f"Color            : {color}").pack(anchor="w")
+        tk.Label(team_frame, text=f"Engine           : {t['bike']['engine']}").pack(anchor="w")
+        tk.Label(team_frame, text=f"Aero             : {t['bike']['aero']}").pack(anchor="w")
+        tk.Label(team_frame, text=f"Reliability      : {t['bike']['reliability']}").pack(anchor="w")
+        tk.Label(team_frame, text=f"Budget           : {t['budget']}").pack(anchor="w")
+
+        tk.Label(team_frame, text="").pack()
+
+        tk.Label(team_frame, text=f"Rider 1          : {rider1}").pack(anchor="w")
+        tk.Label(team_frame, text=f"Rider 2          : {rider2}").pack(anchor="w")
+        tk.Label(team_frame, text=f"Test Rider       : {test_rider}").pack(anchor="w")
+
+        tk.Label(team_frame, text="").pack()
+
+        tk.Label(team_frame, text=f"Manager          : {manager_name}").pack(anchor="w")
+        tk.Label(team_frame, text=f"Status           : {status}").pack(anchor="w")
+        tk.Label(team_frame, text=f"Target           : {target}").pack(anchor="w")
+
+    def next_team():
+        index[0] = (index[0] + 1) % len(teams)
+        render()
+
+    def prev_team():
+        index[0] = (index[0] - 1) % len(teams)
+        render()
+
+    def select_team():
+        global player_team_index
+        player_team_index = index[0]
+        show_game()
+
+    tk.Button(main, text="<", width=5, command=prev_team).grid(row=2, column=0)
+    tk.Button(main, text="Select", width=15, command=select_team).grid(row=2, column=1)
+    tk.Button(main, text=">", width=5, command=next_team).grid(row=2, column=2)
+
+    render()
+
 def next_race():
     global season
 
