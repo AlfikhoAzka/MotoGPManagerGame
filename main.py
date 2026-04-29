@@ -34,17 +34,41 @@ def get_locale(country):
 root = tk.Tk()
 default_font = ("Segoe UI", 10)
 root.option_add("*Font", default_font)
+BG_MAIN   = "#181818"
+BG_PANEL  = "#202020"
+BG_CARD   = "#262626"
+BG_INNER  = "#2a2a2a"
+BG_HOVER  = "#303030"
+
+TEXT_MAIN = "#d0d0d0"
+TEXT_DIM  = "#9a9a9a"
+
+ACCENT    = "#e53935"
+BORDER    = "#2f2f2f"
+
+# apply ke root
+root.configure(bg=BG_MAIN)
+
+# ttk fix
+style = ttk.Style()
+style.theme_use("default")
+
+style.configure("TCombobox",
+    fieldbackground=BG_PANEL,
+    background=BG_PANEL,
+    foreground=TEXT_MAIN
+)
 
 def create_layout():
     clear_window()
 
-    container = tk.Frame(root)
+    container = tk.Frame(root, bg=BG_MAIN)
     container.pack(fill="both", expand=True)
  
-    sidebar = tk.Frame(container, width=200, bg="#1e1e1e")
+    sidebar = tk.Frame(container, width=200, bg=BG_PANEL)
     sidebar.pack(side="left", fill="y")
 
-    content = tk.Frame(container)
+    content = tk.Frame(container, bg=BG_MAIN)
     content.pack(side="right", fill="both", expand=True)
 
     return sidebar, content
@@ -66,44 +90,44 @@ def create_center_frame():
 def show_manager_setup():
     clear_window()
 
-    tk.Label(root, text="Create Manager", font=("Segoe UI",18,"bold")).pack(pady=10)
+    tk.Label(root, text="Create Manager", bg=BG_MAIN, fg=TEXT_MAIN, font=("Segoe UI",18,"bold")).pack(pady=10)
 
-    box = tk.Frame(root)
+    box = tk.Frame(root, bg=BG_MAIN)
     box.pack()
 
-    left = tk.Frame(box)
+    left = tk.Frame(box, bg=BG_MAIN)
     left.grid(row=0, column=0, padx=30)
 
-    right = tk.Frame(box)
+    right = tk.Frame(box, bg=BG_MAIN)
     right.grid(row=0, column=1, padx=30)
 
-    tk.Label(left, text="Name").grid(row=0, column=0, sticky="w")
-    name_entry = tk.Entry(left)
+    tk.Label(left, text="Name", bg=BG_MAIN, fg=TEXT_MAIN).grid(row=0, column=0, sticky="w")
+    name_entry = tk.Entry(left, bg=BG_CARD, fg=TEXT_MAIN, insertbackground=TEXT_MAIN)
     name_entry.grid(row=1, column=0)
 
-    tk.Label(left, text="Age").grid(row=2, column=0, sticky="w")
-    age_entry = tk.Entry(left)
+    tk.Label(left, text="Age", bg=BG_MAIN, fg=TEXT_MAIN).grid(row=2, column=0, sticky="w")
+    age_entry = tk.Entry(left, bg=BG_CARD, fg=TEXT_MAIN, insertbackground=TEXT_MAIN)
     age_entry.insert(0, "30")
     age_entry.grid(row=3, column=0)
 
-    tk.Label(left, text="Country").grid(row=4, column=0, sticky="w")
+    tk.Label(left, text="Country", bg=BG_MAIN, fg=TEXT_MAIN).grid(row=4, column=0, sticky="w")
     country_var = tk.StringVar()
     ttk.Combobox(left, textvariable=country_var, values=countries, width=18).grid(row=5, column=0)
 
-    tk.Label(left, text="Reputation").grid(row=6, column=0, sticky="w")
+    tk.Label(left, text="Reputation", bg=BG_MAIN, fg=TEXT_MAIN).grid(row=6, column=0, sticky="w")
     rep_var = tk.StringVar(value="Newcomer")
     rep_box = ttk.Combobox(left, textvariable=rep_var, width=18,
                            values=["Newcomer", "Known Manager", "Elite Manager"])
     rep_box.grid(row=7, column=0)
 
-    tk.Label(left, text="Trait").grid(row=8, column=0, sticky="w")
+    tk.Label(left, text="Trait", bg=BG_MAIN, fg=TEXT_MAIN).grid(row=8, column=0, sticky="w")
     trait_var = tk.StringVar(value="No Trait")
     ttk.Combobox(left, textvariable=trait_var, width=18,
                  values=list(TRAITS.keys())).grid(row=9, column=0)
 
-    tk.Label(right, text="Manager Skills", font=("Segoe UI",12,"bold")).grid(row=0, column=0)
+    tk.Label(right, text="Manager Skills", bg=BG_MAIN, fg=TEXT_MAIN, font=("Segoe UI",12,"bold")).grid(row=0, column=0)
 
-    skill_text = tk.Label(right, font=("Segoe UI",11), justify="left")
+    skill_text = tk.Label(right, bg=BG_MAIN, fg=TEXT_MAIN, font=("Segoe UI",11), justify="left")
     skill_text.grid(row=1, column=0)
 
     skills_ui = {}
@@ -176,48 +200,55 @@ def show_team_selection():
     index = [0]
 
     TITLE_FONT = ("Segoe UI", 16, "bold")
-    TEAM_FONT = ("Segoe UI", 14, "bold")
+    TEAM_FONT = ("Segoe UI", 18, "bold")
     TEXT_FONT = ("Segoe UI", 10)
 
-    container = tk.Frame(root)
+    # ======================
+    # MAIN CONTAINER
+    # ======================
+    container = tk.Frame(root, bg=BG_MAIN)
     container.pack(fill="both", expand=True)
 
-    left_panel = tk.Frame(container, width=200, bg="#1e1e1e")
+    # ======================
+    # LEFT PANEL
+    # ======================
+    left_panel = tk.Frame(container, width=220, bg=BG_PANEL)
     left_panel.pack(side="left", fill="y")
 
-    right_panel = tk.Frame(container)
-    right_panel.pack(side="right", fill="both", expand=True)
-
     tk.Label(left_panel, text="Teams",
-             fg="white", bg="#1e1e1e",
+             fg="white", bg=BG_PANEL,
              font=TITLE_FONT).pack(pady=10)
 
-    team_listbox = tk.Listbox(left_panel,
-                             bg="#2b2b2b",
-                             fg="white",
-                             font=TEXT_FONT,
-                             selectbackground="#444",
-                             activestyle="none")
-    team_listbox.pack(fill="y", expand=True, padx=10, pady=10)
+    card_container = tk.Frame(left_panel, bg=BG_INNER)
+    card_container.pack(fill="y", expand=True)
 
-    for t in teams:
-        team_listbox.insert(tk.END, t["name"])
+    # ======================
+    # RIGHT PANEL
+    # ======================
+    right_panel = tk.Frame(container, bg=BG_MAIN)
+    right_panel.pack(side="right", fill="both", expand=True)
 
-    top_bar = tk.Frame(right_panel)
+    top_bar = tk.Frame(right_panel, bg=BG_MAIN)
     top_bar.pack(fill="x")
 
-    btn_select = tk.Button(top_bar, text="Select Team", width=15)
+    btn_select = tk.Button(top_bar, text="Select Team", width=15, bg=ACCENT, fg="white", activebackground="#b71c1c", relief="flat")
     btn_select.pack(side="right", padx=10, pady=10)
 
-    content = tk.Frame(right_panel, padx=20, pady=20)
+    content = tk.Frame(right_panel, bg=BG_MAIN)
     content.pack(fill="both", expand=True)
 
+    # ======================
+    # HELPER
+    # ======================
     def get_text_color(bg):
         bg = bg.lstrip("#")
         r, g, b = int(bg[0:2],16), int(bg[2:4],16), int(bg[4:6],16)
         brightness = (r*299 + g*587 + b*114) / 1000
         return "black" if brightness > 128 else "white"
 
+    # ======================
+    # RENDER CARD
+    # ======================
     def render():
         for w in content.winfo_children():
             w.destroy()
@@ -225,14 +256,25 @@ def show_team_selection():
         i = index[0]
         t = teams[i]
 
-        color = t.get("color", "#333333")
+        color = t.get("color", "#444444")
         text_color = get_text_color(color)
 
-        right_panel.configure(bg=color)
-        content.configure(bg=color)
-        top_bar.configure(bg=color)
-        btn_select.configure(bg=color, fg=text_color, activebackground=color)
+        btn_select.configure(bg=color, fg=text_color)
 
+        # SHADOW
+        shadow = tk.Frame(content, bg="#000000")
+        shadow.place(relx=0.5, rely=0.5, anchor="center",
+                     width=420, height=440)
+
+        # CARD
+        card = tk.Frame(content, bg=BG_CARD)
+        card.place(relx=0.5, rely=0.5, anchor="center",
+                   width=400, height=420)
+
+        inner = tk.Frame(card, bg=BG_INNER)
+        inner.pack(expand=True)
+
+        # DATA
         team_riders = [r["name"] for r in riders if r["team"] == t["name"]]
 
         rider1 = team_riders[0] if len(team_riders) > 0 else "-"
@@ -250,70 +292,79 @@ def show_team_selection():
         else:
             target = "Midfield"
 
-        tk.Label(content, text=t["name"],
+        # TITLE
+        tk.Label(inner, text=t["name"],
                  font=TEAM_FONT,
-                 bg=color, fg=text_color)\
-            .grid(row=0, column=0, columnspan=2, pady=(0,15))
+                 bg=BG_INNER,
+                 fg=color).pack(pady=(15, 10))
 
-        row = 1
-
-        def add_row(label, value):
-            nonlocal row
-
-            tk.Label(content,
-                     text=label,
+        def add(text):
+            tk.Label(inner,
+                     text=text,
                      font=TEXT_FONT,
-                     bg=color,
-                     fg=text_color,
-                     anchor="w",
-                     width=20)\
-                .grid(row=row, column=0, sticky="w")
+                     bg=BG_INNER,
+                     fg=TEXT_MAIN).pack(pady=2)
 
-            tk.Label(content,
-                     text=str(value),
-                     font=TEXT_FONT,
-                     bg=color,
-                     fg=text_color,
-                     anchor="w",
-                     width=20)\
-                .grid(row=row, column=1, sticky="w")
+        add(f"Engine: {t['bike']['engine']}")
+        add(f"Aero: {t['bike']['aero']}")
+        add(f"Reliability: {t['bike']['reliability']}")
+        add(f"Budget: {t['budget']}")
 
-            row += 1
+        tk.Label(inner, text="", bg="#2f2f2f").pack()
 
-        add_row("Engine", t['bike']['engine'])
-        add_row("Aero", t['bike']['aero'])
-        add_row("Reliability", t['bike']['reliability'])
-        add_row("Budget", t['budget'])
+        add(f"Rider 1: {rider1}")
+        add(f"Rider 2: {rider2}")
+        add(f"Test Rider: {test_rider}")
 
-        row += 1
+        tk.Label(inner, text="", bg="#2f2f2f").pack()
 
-        add_row("Rider 1", rider1)
-        add_row("Rider 2", rider2)
-        add_row("Test Rider", test_rider)
+        add(f"Manager: {manager_name}")
+        add(f"Status: {status}")
+        add(f"Target: {target}")
 
-        row += 1
+    # ======================
+    # TEAM LIST
+    # ======================
+    def create_team_card(parent, team_name, idx):
+        card = tk.Frame(parent, bg=BG_PANEL, padx=10, pady=8)
+        card.pack(fill="x", padx=10, pady=5)
 
-        add_row("Manager", manager_name)
-        add_row("Status", status)
-        add_row("Target", target)
+        label = tk.Label(card, text=team_name, bg=BG_PANEL, fg=TEXT_MAIN)
+        label.pack(anchor="w")
 
-        content.grid_columnconfigure(0, weight=0)
-        content.grid_columnconfigure(1, weight=0)
+        def on_enter(e):
+            card.configure(bg=BG_HOVER)
+            label.configure(bg=BG_HOVER)
 
-    def on_select(event):
-        if team_listbox.curselection():
-            index[0] = team_listbox.curselection()[0]
+        def on_leave(e):
+            card.configure(bg=BG_PANEL)
+            label.configure(bg=BG_PANEL)
+
+        def on_click(e):
+            index[0] = idx
             render()
 
+        card.bind("<Enter>", on_enter)
+        card.bind("<Leave>", on_leave)
+        card.bind("<Button-1>", on_click)
+
+        label.bind("<Enter>", on_enter)
+        label.bind("<Leave>", on_leave)
+        label.bind("<Button-1>", on_click)
+
+    for i, t in enumerate(teams):
+        create_team_card(card_container, t["name"], i)
+
+    # ======================
+    # SELECT BUTTON
+    # ======================
     def select_team():
         global player_team_index
         player_team_index = index[0]
         show_game()
 
-    team_listbox.bind("<<ListboxSelect>>", on_select)
     btn_select.configure(command=select_team)
 
-    team_listbox.select_set(0)
     render()
 
 def next_race():
@@ -372,21 +423,21 @@ def show_game():
     tk.Button(sidebar, text="Main Menu", width=20,
               command=show_menu).pack(pady=5)
 
-    top = tk.Frame(content)
+    top = tk.Frame(content, bg=BG_MAIN)
     top.pack(fill="x")
 
     global info, text, log
 
-    info = tk.Label(top, font=TEXT_FONT)
+    info = tk.Label(top, font=TEXT_FONT, bg=BG_MAIN, fg=TEXT_MAIN)
     info.pack(anchor="w", padx=10, pady=10)
 
-    main_area = tk.Frame(content)
+    main_area = tk.Frame(content, bg=BG_MAIN)
     main_area.pack(fill="both", expand=True)
 
-    text = tk.Text(main_area, width=40)
+    text = tk.Text(main_area, width=40, bg=BG_CARD, fg=TEXT_MAIN, insertbackground=TEXT_MAIN)
     text.pack(side="left", fill="both", expand=True, padx=10, pady=10)
 
-    log = tk.Text(main_area, width=30)
+    log = tk.Text(main_area, width=30, bg=BG_CARD, fg=TEXT_MAIN, insertbackground=TEXT_MAIN)
     log.pack(side="right", fill="y", padx=10, pady=10)
 
     update_ui()
@@ -414,29 +465,41 @@ def show_menu():
     TITLE_FONT = ("Segoe UI", 24, "bold")
     BTN_FONT = ("Segoe UI", 11)
 
-    wrapper = tk.Frame(root)
+    wrapper = tk.Frame(root, bg=BG_MAIN)
     wrapper.pack(expand=True)
 
-    container = tk.Frame(wrapper)
+    container = tk.Frame(wrapper, bg=BG_MAIN)
     container.pack()
 
     tk.Label(container,
-             text="MotoGP Manager",
-             font=TITLE_FONT)\
-        .pack(pady=(0, 20))
+        text="MotoGP Manager",
+        font=TITLE_FONT,
+        bg=BG_MAIN,
+        fg=TEXT_MAIN
+    ).pack(pady=(0, 20))
 
     tk.Button(container,
-              text="New Game",
-              width=25,
-              font=BTN_FONT,
-              command=new_game)\
-        .pack(pady=5)
+        text="New Game",
+        width=25,
+        font=BTN_FONT,
+        bg=BG_PANEL,
+        fg=TEXT_MAIN,
+        activebackground=BG_HOVER,
+        activeforeground=TEXT_MAIN,
+        relief="flat",
+        command=new_game
+    ).pack(pady=5)
 
     if load_game():
         tk.Button(container,
                   text="Resume",
                   width=25,
                   font=BTN_FONT,
+                  bg=BG_PANEL,
+                  fg=TEXT_MAIN,
+                  activebackground=BG_HOVER,
+                  activeforeground=TEXT_MAIN,
+                  relief="flat",
                   command=resume_game)\
             .pack(pady=5)
 
@@ -444,6 +507,11 @@ def show_menu():
               text="Quit",
               width=25,
               font=BTN_FONT,
+              bg=BG_PANEL,
+              fg=TEXT_MAIN,
+              activebackground=BG_HOVER,
+              activeforeground=TEXT_MAIN,
+              relief="flat",
               command=root.quit)\
         .pack(pady=5)
 
