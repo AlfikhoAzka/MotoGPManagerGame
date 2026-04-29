@@ -62,13 +62,13 @@ style.configure("TCombobox",
 def create_layout():
     clear_window()
 
-    container = tk.Frame(root, bg=BG_MAIN)
+    container = tk.Frame(root, bg=BG_MAIN, bd=0, highlightthickness=0)
     container.pack(fill="both", expand=True)
  
-    sidebar = tk.Frame(container, width=200, bg=BG_PANEL)
+    sidebar = tk.Frame(container, width=200, bg=BG_PANEL, bd=0, highlightthickness=0)
     sidebar.pack(side="left", fill="y")
 
-    content = tk.Frame(container, bg=BG_MAIN)
+    content = tk.Frame(container, bg=BG_MAIN, bd=0, highlightthickness=0)
     content.pack(side="right", fill="both", expand=True)
 
     return sidebar, content
@@ -81,9 +81,9 @@ def clear_window():
         w.destroy()
 
 def create_center_frame():
-    wrap = tk.Frame(root)
+    wrap = tk.Frame(root, bg=BG_MAIN, bd=0, highlightthickness=0)
     wrap.pack(expand=True)
-    f = tk.Frame(wrap)
+    f = tk.Frame(wrap, bg=BG_MAIN, bd=0, highlightthickness=0)
     f.pack()
     return f
 
@@ -92,13 +92,13 @@ def show_manager_setup():
 
     tk.Label(root, text="Create Manager", bg=BG_MAIN, fg=TEXT_MAIN, font=("Segoe UI",18,"bold")).pack(pady=10)
 
-    box = tk.Frame(root, bg=BG_MAIN)
+    box = tk.Frame(root, bg=BG_MAIN, bd=0, highlightthickness=0)
     box.pack()
 
-    left = tk.Frame(box, bg=BG_MAIN)
+    left = tk.Frame(box, bg=BG_MAIN, bd=0, highlightthickness=0)
     left.grid(row=0, column=0, padx=30)
 
-    right = tk.Frame(box, bg=BG_MAIN)
+    right = tk.Frame(box, bg=BG_MAIN, bd=0, highlightthickness=0)
     right.grid(row=0, column=1, padx=30)
 
     tk.Label(left, text="Name", bg=BG_MAIN, fg=TEXT_MAIN).grid(row=0, column=0, sticky="w")
@@ -188,8 +188,8 @@ def show_manager_setup():
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
-    tk.Button(root, text="Start", command=start_game).pack(pady=10)
-    tk.Button(root, text="Back", command=show_menu).pack()
+    tk.Button(root, text="Start", bg= BG_PANEL, fg=TEXT_MAIN, command=start_game).pack(pady=10)
+    tk.Button(root, text="Back", bg= BG_PANEL, fg=TEXT_MAIN, command=show_menu).pack()
 
 def get_player_team():
     return teams[player_team_index]
@@ -225,16 +225,16 @@ def show_team_selection():
     # ======================
     # RIGHT PANEL
     # ======================
-    right_panel = tk.Frame(container, bg=BG_MAIN)
+    right_panel = tk.Frame(container, bg=BG_MAIN, bd=0, highlightthickness=0)
     right_panel.pack(side="right", fill="both", expand=True)
 
-    top_bar = tk.Frame(right_panel, bg=BG_MAIN)
+    top_bar = tk.Frame(right_panel, bg=BG_MAIN, bd=0, highlightthickness=0)
     top_bar.pack(fill="x")
 
     btn_select = tk.Button(top_bar, text="Select Team", width=15, bg=ACCENT, fg="white", activebackground="#b71c1c", relief="flat")
     btn_select.pack(side="right", padx=10, pady=10)
 
-    content = tk.Frame(right_panel, bg=BG_MAIN)
+    content = tk.Frame(right_panel, bg=BG_MAIN, bd=0, highlightthickness=0)
     content.pack(fill="both", expand=True)
 
     # ======================
@@ -267,11 +267,11 @@ def show_team_selection():
                      width=420, height=440)
 
         # CARD
-        card = tk.Frame(content, bg=BG_CARD)
+        card = tk.Frame(content, bg=BG_CARD, bd=0, highlightthickness=0)
         card.place(relx=0.5, rely=0.5, anchor="center",
                    width=400, height=420)
 
-        inner = tk.Frame(card, bg=BG_INNER)
+        inner = tk.Frame(card, bg=BG_INNER, bd=0, highlightthickness=0)
         inner.pack(expand=True)
 
         # DATA
@@ -326,7 +326,7 @@ def show_team_selection():
     # TEAM LIST
     # ======================
     def create_team_card(parent, team_name, idx):
-        card = tk.Frame(parent, bg=BG_PANEL, padx=10, pady=8)
+        card = tk.Frame(parent, bg=BG_PANEL, padx=10, pady=8, bd=0, highlightthickness=0)
         card.pack(fill="x", padx=10, pady=5)
 
         label = tk.Label(card, text=team_name, bg=BG_PANEL, fg=TEXT_MAIN)
@@ -407,23 +407,17 @@ def show_game():
     TITLE_FONT = ("Segoe UI", 14, "bold")
     TEXT_FONT = ("Segoe UI", 10)
 
-    tk.Label(sidebar, text="Menu",
-             fg="white", bg="#1e1e1e",
-             font=TITLE_FONT).pack(pady=10)
+    tk.Label(sidebar, text="Menu", fg="white", bg=BG_PANEL, font=TITLE_FONT).pack(pady=10)
 
-    tk.Button(sidebar, text="Next Race", width=20,
-              command=next_race).pack(pady=5)
+    tk.Button(sidebar, text="Next Race", width=20, bg=BG_PANEL, fg=TEXT_MAIN, command=next_race).pack(pady=5)
 
-    tk.Button(sidebar, text="Upgrade Bike", width=20,
-              command=do_upgrade).pack(pady=5)
+    tk.Button(sidebar, text="Upgrade Bike", width=20, bg=BG_PANEL, fg=TEXT_MAIN, command=do_upgrade).pack(pady=5)
 
-    tk.Button(sidebar, text="Save", width=20,
-              command=save).pack(pady=5)
+    tk.Button(sidebar, text="Save", width=20, bg=BG_PANEL, fg=TEXT_MAIN, command=save).pack(pady=5)
 
-    tk.Button(sidebar, text="Main Menu", width=20,
-              command=show_menu).pack(pady=5)
+    tk.Button(sidebar, text="Main Menu", width=20, bg=BG_PANEL, fg=TEXT_MAIN, command=show_menu).pack(pady=5)
 
-    top = tk.Frame(content, bg=BG_MAIN)
+    top = tk.Frame(content, bg=BG_MAIN, bd=0, highlightthickness=0)
     top.pack(fill="x")
 
     global info, text, log
@@ -431,7 +425,7 @@ def show_game():
     info = tk.Label(top, font=TEXT_FONT, bg=BG_MAIN, fg=TEXT_MAIN)
     info.pack(anchor="w", padx=10, pady=10)
 
-    main_area = tk.Frame(content, bg=BG_MAIN)
+    main_area = tk.Frame(content, bg=BG_MAIN, bd=0, highlightthickness=0)
     main_area.pack(fill="both", expand=True)
 
     text = tk.Text(main_area, width=40, bg=BG_CARD, fg=TEXT_MAIN, insertbackground=TEXT_MAIN)
@@ -465,10 +459,10 @@ def show_menu():
     TITLE_FONT = ("Segoe UI", 24, "bold")
     BTN_FONT = ("Segoe UI", 11)
 
-    wrapper = tk.Frame(root, bg=BG_MAIN)
+    wrapper = tk.Frame(root, bg=BG_MAIN, bd=0, highlightthickness=0)
     wrapper.pack(expand=True)
 
-    container = tk.Frame(wrapper, bg=BG_MAIN)
+    container = tk.Frame(wrapper, bg=BG_MAIN, bd=0, highlightthickness=0)
     container.pack()
 
     tk.Label(container,
