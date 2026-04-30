@@ -46,17 +46,23 @@ TEXT_DIM  = "#9a9a9a"
 ACCENT    = "#e53935"
 BORDER    = "#2f2f2f"
 
-# apply ke root
 root.configure(bg=BG_MAIN)
 
-# ttk fix
 style = ttk.Style()
 style.theme_use("default")
 
 style.configure("TCombobox",
-    fieldbackground=BG_PANEL,
-    background=BG_PANEL,
-    foreground=TEXT_MAIN
+    fieldbackground=BG_CARD,
+    background=BG_CARD,
+    foreground=TEXT_MAIN,
+    borderwidth=0,
+    relief="flat"
+)
+
+style.map("TCombobox",
+    fieldbackground=[("readonly", BG_CARD)],
+    selectbackground=[("readonly", BG_CARD)],
+    selectforeground=[("readonly", TEXT_MAIN)]
 )
 
 def create_layout():
@@ -102,11 +108,11 @@ def show_manager_setup():
     right.grid(row=0, column=1, padx=30)
 
     tk.Label(left, text="Name", bg=BG_MAIN, fg=TEXT_MAIN).grid(row=0, column=0, sticky="w")
-    name_entry = tk.Entry(left, bg=BG_CARD, fg=TEXT_MAIN, insertbackground=TEXT_MAIN)
+    name_entry = tk.Entry(left, bg=BG_CARD, fg=TEXT_MAIN, insertbackground=TEXT_MAIN, relief="flat", bd=0, highlightthickness=0)
     name_entry.grid(row=1, column=0)
 
     tk.Label(left, text="Age", bg=BG_MAIN, fg=TEXT_MAIN).grid(row=2, column=0, sticky="w")
-    age_entry = tk.Entry(left, bg=BG_CARD, fg=TEXT_MAIN, insertbackground=TEXT_MAIN)
+    age_entry = tk.Entry(left, bg=BG_CARD, fg=TEXT_MAIN, insertbackground=TEXT_MAIN, relief="flat", bd=0, highlightthickness=0)
     age_entry.insert(0, "30")
     age_entry.grid(row=3, column=0)
 
@@ -148,7 +154,7 @@ def show_manager_setup():
 
     rep_var.trace_add("write", lambda *args: roll())
 
-    tk.Button(right, text="Reroll", command=roll).grid(row=2, column=0, pady=10)
+    tk.Button(right,text="Reroll", command=roll, bg=BG_PANEL, fg=TEXT_MAIN, activebackground=BG_HOVER, activeforeground=TEXT_MAIN, relief="flat", bd=0, highlightthickness=0, cursor="hand2").grid(row=2, column=0, pady=10)
 
     def start_game():
         global riders, teams, manager, ai_managers, season
@@ -188,8 +194,8 @@ def show_manager_setup():
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
-    tk.Button(root, text="Start", bg= BG_PANEL, fg=TEXT_MAIN, command=start_game).pack(pady=10)
-    tk.Button(root, text="Back", bg= BG_PANEL, fg=TEXT_MAIN, command=show_menu).pack()
+    tk.Button(root, text="Start", command=start_game, bg=BG_PANEL, fg=TEXT_MAIN, activebackground=BG_HOVER, activeforeground=TEXT_MAIN, relief="flat", bd=0, highlightthickness=0, cursor="hand2").pack(pady=10)
+    tk.Button( root, text="Back", command=show_menu, bg=BG_PANEL, fg=TEXT_MAIN, activebackground=BG_HOVER, activeforeground=TEXT_MAIN, relief="flat", bd=0, highlightthickness=0, cursor="hand2").pack()
 
 def get_player_team():
     return teams[player_team_index]
@@ -203,15 +209,9 @@ def show_team_selection():
     TEAM_FONT = ("Segoe UI", 18, "bold")
     TEXT_FONT = ("Segoe UI", 10)
 
-    # ======================
-    # MAIN CONTAINER
-    # ======================
     container = tk.Frame(root, bg=BG_MAIN)
     container.pack(fill="both", expand=True)
 
-    # ======================
-    # LEFT PANEL
-    # ======================
     left_panel = tk.Frame(container, width=220, bg=BG_PANEL)
     left_panel.pack(side="left", fill="y")
 
@@ -222,33 +222,24 @@ def show_team_selection():
     card_container = tk.Frame(left_panel, bg=BG_INNER)
     card_container.pack(fill="y", expand=True)
 
-    # ======================
-    # RIGHT PANEL
-    # ======================
     right_panel = tk.Frame(container, bg=BG_MAIN, bd=0, highlightthickness=0)
     right_panel.pack(side="right", fill="both", expand=True)
 
     top_bar = tk.Frame(right_panel, bg=BG_MAIN, bd=0, highlightthickness=0)
     top_bar.pack(fill="x")
 
-    btn_select = tk.Button(top_bar, text="Select Team", width=15, bg=ACCENT, fg="white", activebackground="#b71c1c", relief="flat")
+    btn_select = tk.Button( top_bar, text="Select Team", width=15, bg=ACCENT, fg="white", activebackground="#b71c1c", activeforeground="white", relief="flat", bd=0, highlightthickness=0, cursor="hand2")
     btn_select.pack(side="right", padx=10, pady=10)
 
     content = tk.Frame(right_panel, bg=BG_MAIN, bd=0, highlightthickness=0)
     content.pack(fill="both", expand=True)
 
-    # ======================
-    # HELPER
-    # ======================
     def get_text_color(bg):
         bg = bg.lstrip("#")
         r, g, b = int(bg[0:2],16), int(bg[2:4],16), int(bg[4:6],16)
         brightness = (r*299 + g*587 + b*114) / 1000
         return "black" if brightness > 128 else "white"
 
-    # ======================
-    # RENDER CARD
-    # ======================
     def render():
         for w in content.winfo_children():
             w.destroy()
@@ -261,20 +252,17 @@ def show_team_selection():
 
         btn_select.configure(bg=color, fg=text_color)
 
-        # SHADOW
         shadow = tk.Frame(content, bg="#000000")
         shadow.place(relx=0.5, rely=0.5, anchor="center",
                      width=420, height=440)
 
-        # CARD
-        card = tk.Frame(content, bg=BG_CARD, bd=0, highlightthickness=0)
+        card = tk.Frame(content, bg=color, bd=0, highlightthickness=0)
         card.place(relx=0.5, rely=0.5, anchor="center",
                    width=400, height=420)
 
-        inner = tk.Frame(card, bg=BG_INNER, bd=0, highlightthickness=0)
+        inner = tk.Frame(card, bg=color, bd=0, highlightthickness=0)
         inner.pack(expand=True)
 
-        # DATA
         team_riders = [r["name"] for r in riders if r["team"] == t["name"]]
 
         rider1 = team_riders[0] if len(team_riders) > 0 else "-"
@@ -292,39 +280,35 @@ def show_team_selection():
         else:
             target = "Midfield"
 
-        # TITLE
         tk.Label(inner, text=t["name"],
                  font=TEAM_FONT,
-                 bg=BG_INNER,
-                 fg=color).pack(pady=(15, 10))
+                 bg=color,
+                 fg=text_color).pack(pady=(15, 10))
 
         def add(text):
             tk.Label(inner,
                      text=text,
                      font=TEXT_FONT,
-                     bg=BG_INNER,
-                     fg=TEXT_MAIN).pack(pady=2)
+                     bg=color,
+                     fg=text_color).pack(pady=2)
 
         add(f"Engine: {t['bike']['engine']}")
         add(f"Aero: {t['bike']['aero']}")
         add(f"Reliability: {t['bike']['reliability']}")
         add(f"Budget: {t['budget']}")
 
-        tk.Label(inner, text="", bg="#2f2f2f").pack()
+        tk.Label(inner, text="", bg=color).pack()
 
         add(f"Rider 1: {rider1}")
         add(f"Rider 2: {rider2}")
         add(f"Test Rider: {test_rider}")
 
-        tk.Label(inner, text="", bg="#2f2f2f").pack()
+        tk.Label(inner, text="", bg=color).pack()
 
         add(f"Manager: {manager_name}")
         add(f"Status: {status}")
         add(f"Target: {target}")
 
-    # ======================
-    # TEAM LIST
-    # ======================
     def create_team_card(parent, team_name, idx):
         card = tk.Frame(parent, bg=BG_PANEL, padx=10, pady=8, bd=0, highlightthickness=0)
         card.pack(fill="x", padx=10, pady=5)
@@ -355,9 +339,6 @@ def show_team_selection():
     for i, t in enumerate(teams):
         create_team_card(card_container, t["name"], i)
 
-    # ======================
-    # SELECT BUTTON
-    # ======================
     def select_team():
         global player_team_index
         player_team_index = index[0]
@@ -409,13 +390,13 @@ def show_game():
 
     tk.Label(sidebar, text="Menu", fg="white", bg=BG_PANEL, font=TITLE_FONT).pack(pady=10)
 
-    tk.Button(sidebar, text="Next Race", width=20, bg=BG_PANEL, fg=TEXT_MAIN, command=next_race).pack(pady=5)
+    tk.Button(sidebar, text="Next Race", width=20, bg=BG_PANEL, fg=TEXT_MAIN, command=next_race, relief="flat", bd=0, highlightthickness=0, cursor="hand2").pack(pady=5)
 
-    tk.Button(sidebar, text="Upgrade Bike", width=20, bg=BG_PANEL, fg=TEXT_MAIN, command=do_upgrade).pack(pady=5)
+    tk.Button(sidebar, text="Upgrade Bike", width=20, bg=BG_PANEL, fg=TEXT_MAIN, command=do_upgrade, relief="flat", bd=0, highlightthickness=0, cursor="hand2").pack(pady=5)
 
-    tk.Button(sidebar, text="Save", width=20, bg=BG_PANEL, fg=TEXT_MAIN, command=save).pack(pady=5)
+    tk.Button(sidebar, text="Save", width=20, bg=BG_PANEL, fg=TEXT_MAIN, command=save, relief="flat", bd=0, highlightthickness=0, cursor="hand2").pack(pady=5)
 
-    tk.Button(sidebar, text="Main Menu", width=20, bg=BG_PANEL, fg=TEXT_MAIN, command=show_menu).pack(pady=5)
+    tk.Button(sidebar, text="Main Menu", width=20, bg=BG_PANEL, fg=TEXT_MAIN, command=show_menu, relief="flat", bd=0, highlightthickness=0, cursor="hand2").pack(pady=5)
 
     top = tk.Frame(content, bg=BG_MAIN, bd=0, highlightthickness=0)
     top.pack(fill="x")
@@ -465,24 +446,9 @@ def show_menu():
     container = tk.Frame(wrapper, bg=BG_MAIN, bd=0, highlightthickness=0)
     container.pack()
 
-    tk.Label(container,
-        text="MotoGP Manager",
-        font=TITLE_FONT,
-        bg=BG_MAIN,
-        fg=TEXT_MAIN
-    ).pack(pady=(0, 20))
+    tk.Label(container, text="MotoGP Manager", font=TITLE_FONT, bg=BG_MAIN, fg=TEXT_MAIN).pack(pady=(0, 20))
 
-    tk.Button(container,
-        text="New Game",
-        width=25,
-        font=BTN_FONT,
-        bg=BG_PANEL,
-        fg=TEXT_MAIN,
-        activebackground=BG_HOVER,
-        activeforeground=TEXT_MAIN,
-        relief="flat",
-        command=new_game
-    ).pack(pady=5)
+    tk.Button(container, text="New Game", width=25, font=BTN_FONT, bg=BG_PANEL, fg=TEXT_MAIN, activebackground=BG_HOVER, activeforeground=TEXT_MAIN, relief="flat", command=new_game ).pack(pady=5)
 
     if load_game():
         tk.Button(container,
